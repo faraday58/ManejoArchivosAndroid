@@ -3,14 +3,13 @@ package com.temas.selectos.archivosconcurrente;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -102,5 +101,111 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+
+
+
+    /*Ejemplo de guardar con hilos en una secuencia que no es visible para el usuario*/
+    //Método onClick para demostrar ejecución en paralelo
+    public void onClick(View v){
+        Toast.makeText(this,"Hilos",Toast.LENGTH_SHORT).show();
+        GuardaHilo();
+        LeerHilor();
+
+    }
+
+    public void Guarda()
+    {
+        String texto= "Un texto \n cualquiera\n Mi texto";
+        FileOutputStream fos= null;
+
+        try {
+            fos= openFileOutput(nombre,MODE_PRIVATE);
+            Thread.sleep(2000);
+            fos.write(texto.getBytes());
+            Log.d("Archivo","Se escribieron los archivos");
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if(fos !=null)
+            {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void Leer()
+    {
+        FileInputStream fis= null;
+        try {
+            fis=openFileInput(nombre);
+            InputStreamReader isr= new InputStreamReader(fis);
+            BufferedReader br= new BufferedReader(isr);
+            StringBuilder sb= new StringBuilder();
+            String texto="";
+
+            while ((texto=br.readLine())!=null)
+            {
+                sb.append(texto).append("\n");
+            }
+            Log.d("Archivo",""+texto);
+            Log.d("Archivo","Lectura Terminada");
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(fis!=null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+    }
+
+
+
+    public void GuardaHilo()  {
+        //try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Guarda();
+
+                }
+            }).start();
+      /*  } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    public void LeerHilor()
+    {
+       // try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Leer();
+                }
+            }).start();
+     /*   } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+    }
 
 }
